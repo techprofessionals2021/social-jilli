@@ -50,18 +50,44 @@ class CreateCampaignRequest extends FormRequest
         ];
     }
 
+    public function groupByOsVersionsIntoOs($OSVersionsWithOs)
+    {
+        $os_versions = [];
+
+        foreach ($OSVersionsWithOs as $key => $value) {
+            $array = explode('|', $value);
+            $os_id = array_shift($array);
+            $os_version_id = implode($array);
+            if(array_key_exists($os_id,$os_versions)){
+
+                 if(is_array($os_versions[$os_id]))
+                {
+                    array_push($os_versions[$os_id],$os_version_id);
+                }else{
+                    $os_versions[$os_id] = array($os_versions[$os_id],$os_version_id);
+                }
+            }else{
+                $os_versions[$os_id] = array($os_version_id);
+            }
+
+        }
+
+        return $os_versions;
+
+    }
 
     public function handle()
     {
         $this->validated();
         $params = $this->all();
+        dd(json_encode($this->groupByOsVersionsIntoOs($params['os_version'])));
 
-      
-    
+
+
 //        dd($params,12,number_format(11231232,2));
 
-        $country_codes = $params['country']; 
-        $costs = $params['cost']; 
+        $country_codes = $params['country'];
+        $costs = $params['cost'];
 
         $result = array();
 
@@ -76,7 +102,7 @@ class CreateCampaignRequest extends FormRequest
         $os_array = $params['os'];
 
         $os = [];
-      
+
         foreach ($os_array as $element) {
             $os[] = (int)$element;
         }
@@ -84,40 +110,39 @@ class CreateCampaignRequest extends FormRequest
         $browser_array = $params['browser'];
 
         $browser = [];
-      
+
         foreach ($browser_array as $element) {
             $browser[] = (int)$element;
         }
 
         $browser_lang_array = $params['browser_language'];
-      
+
         $browser_lang = [];
-      
+
         foreach ($browser_lang_array as $element) {
-          
+
             $browser_lang[] = $element;
         }
-      
-   
+
+
         $device_array = $params['device'];
 
         $device = [];
-      
+
         foreach ($device_array as $element) {
             $device[] = (int)$element;
         }
-     
+
 
         $audience_array = $params['audiences'];
 
         $audience = [];
-      
+
         foreach ($audience_array as $element) {
             $audience[] = (int)$element;
         }
-     
 
-        // dd($os);
+
 
 
         $response = Http::withHeaders([
@@ -139,7 +164,7 @@ class CreateCampaignRequest extends FormRequest
                 "os"=> $os,
                 "browser"=> $browser,
                 "browserLang"=> $browser_lang,
-
+                "osVersions" => json_encode($this->groupByOsVersionsIntoOs($params['os_version'])),
                 "budgetLimitTotal"=> $params['total_budget_limit'],
                 "budgetLimitDaily"=> $params['daily_budget_limit'],
                 "clicksLimitTotal"=>$params['total_click_limit'],
@@ -162,7 +187,7 @@ class CreateCampaignRequest extends FormRequest
             $item = new Campaign;
 
             $item->camp_id = $data['data']['id'];
-         
+
             $item->name = $params['name'];
             $item->traffic_quality = $params['traffic_quality'];
             $item->pricing_model = $params['pricing_model'];
@@ -173,10 +198,10 @@ class CreateCampaignRequest extends FormRequest
             $item->btn_title = $params['btn_title'];
             $item->btn_description = $params['btn_description'];
             $item->status_id = 4;
-    
+
             $item->country = json_encode($params['country']);
-            
-    
+
+
     //        $item->city = json_encode($params['city']);
             $item->device = json_encode($params['device']);
             $item->os = json_encode($params['os']);
@@ -185,18 +210,18 @@ class CreateCampaignRequest extends FormRequest
             $item->browser_language = json_encode($params['browser_language']);
             $item->connection_type = json_encode($params['connection_type']);
             $item->audience = json_encode($params['audiences']);
-    
-      
-    
-    
+
+
+
+
             $item->total_budget_limit = $params['total_budget_limit'];
             $item->daily_budget_limit = $params['daily_budget_limit'];
             $item->total_click_limit = $params['total_click_limit'];
             $item->daily_click_limit = $params['daily_click_limit'];
             $item->audience_type = $params['audience_type'];
-    
+
             $item->save();
-    
+
 
         }
 
@@ -204,7 +229,7 @@ class CreateCampaignRequest extends FormRequest
             return redirect()->route('campaign.create')->with('error', __('Campaign was not Created'));
         }
 
-       
+
 
     }
 }
