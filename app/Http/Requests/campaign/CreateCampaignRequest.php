@@ -80,7 +80,7 @@ class CreateCampaignRequest extends FormRequest
     {
         $this->validated();
         $params = $this->all();
-        dd(json_encode($this->groupByOsVersionsIntoOs($params['os_version'])));
+//        dd(json_encode($this->groupByOsVersionsIntoOs($params['os_version'])));
 
 
 
@@ -164,7 +164,9 @@ class CreateCampaignRequest extends FormRequest
                 "os"=> $os,
                 "browser"=> $browser,
                 "browserLang"=> $browser_lang,
-                "osVersions" => json_encode($this->groupByOsVersionsIntoOs($params['os_version'])),
+//                "osVersions" => json_encode($this->groupByOsVersionsIntoOs($params['os_version'])),
+                "osVersions" => $this->groupByOsVersionsIntoOs($params['os_version'])
+    ,
                 "budgetLimitTotal"=> $params['total_budget_limit'],
                 "budgetLimitDaily"=> $params['daily_budget_limit'],
                 "clicksLimitTotal"=>$params['total_click_limit'],
